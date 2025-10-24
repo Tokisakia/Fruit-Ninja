@@ -1,0 +1,108 @@
+@charset "utf-8";
+/* CSS Document */
+
+/* 基本设置，实现全屏 */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* 防止出现滚动条 */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: white;
+}
+
+/* 游戏画布，默认隐藏 */
+canvas {
+    display: none;
+    background: #222; /* 游戏时的深色背景 */
+}
+
+/* 所有覆盖层 (菜单、游戏结束等) */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none; /* 默认隐藏 */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.6); /* 半透明黑色背景 */
+}
+
+/* .active 类用于显示当前活动的覆盖层 */
+.overlay.active {
+    display: flex;
+}
+
+/* 开始菜单特定样式 */
+#startScreen {
+    /* 请确保你的文件夹中有一张名为 'background.jpg' 的图片!
+      否则请删除或修改下面这行。
+    */
+    background-image: url('background.png');
+    background-size: cover;
+    background-position: center;
+}
+
+#startScreen h1 {
+    font-size: 5rem; /* 大标题 */
+    color: #fff;
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* 按钮统一样式 */
+button {
+    font-size: 1.5rem;
+    padding: 1rem 2rem;
+    margin: 0.5rem;
+    border: none;
+    border-radius: 10px;
+    background-color: #4CAF50; /* 绿色 */
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* 游戏说明弹窗 */
+#instructionsModal .modal-content {
+    background: white;
+    color: #333;
+    padding: 2rem;
+    border-radius: 15px;
+    max-width: 500px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+#instructionsModal p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* 游戏结束界面 */
+#gameOverScreen h2 {
+    font-size: 3rem;
+    color: #dc3545; /* 红色 */
+}
+
+#finalScore {
+    font-size: 2rem;
+    margin: 1rem 0;
+}
+
+#restartButton {
+    background-color: #007bff; /* 蓝色 */
+}
+
+#restartButton:hover {
+    background-color: #0069d9;
+}
+

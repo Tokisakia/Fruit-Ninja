@@ -19,6 +19,11 @@ let isSlicing = false;
 let slicePoints = []; // 存储切割轨迹点
 const gravity = 0.2; // 统一的重力
 
+// --- 【新增】BGM ---
+const bgm = new Audio('bgm.mp3'); // 假设你的BGM文件名为 bgm.mp3
+bgm.loop = true; // 设置循环播放
+bgm.volume = 0.4; // 设置音量 (0.0 到 1.0 之间)
+
 // --- 音效 (如果有音频文件，请取消注释) ---
 // const cutSound = new Audio('cut.mp3');
 // const bombSound = new Audio('bomb.mp3');
@@ -48,7 +53,7 @@ class Fruit {
         // 水平速度 (Range: -4 to 4)
         this.vx = (Math.random() - 0.5) * 8; 
 
-        this.radius = Math.random() * 10 + 60; // 随机大小 (用作通用尺寸)
+        this.radius = Math.random() * 10 + 80; // 随机大小 (用作通用尺寸)
         
         // 随机水果颜色 (增加了几种)
         this.color = ['#28a745', '#ffc107', '#dc3545', '#fd7e14', '#6f42c1'][Math.floor(Math.random() * 5)];
@@ -233,6 +238,11 @@ function startGame() {
     gameOverScreen.classList.remove('active');
     canvas.style.display = 'block';
 
+    // 【新增】播放BGM
+    // 浏览器要求必须有用户交互 (比如点击) 才能播放音频
+    bgm.currentTime = 0; // 每次重新开始都从头播放
+    bgm.play().catch(e => console.error("BGM 播放失败:", e));
+
     // 调整画布大小并开始游戏
     resizeCanvas();
     addFruit();
@@ -244,6 +254,9 @@ function endGame() {
     canvas.style.display = 'none';
     gameOverScreen.classList.add('active');
     finalScoreElement.textContent = `你的得分: ${score}`;
+
+    // 【新增】暂停BGM
+    bgm.pause();
 }
 
 // --- 事件监听 ---
@@ -290,11 +303,12 @@ canvas.addEventListener('pointerleave', () => {
 canvas.addEventListener('pointermove', (e) => {
     if (!isSlicing || !gameRunning) return;
 
+
     const x = e.clientX;
     const y = e.clientY;
     slicePoints.push({ x, y });
 
-    // 检查是否切割到
+    // S检查是否切割到
     // 从后往前遍历，这样删除时不会影响索引
     for (let i = fruits.length - 1; i >= 0; i--) {
         const fruit = fruits[i];

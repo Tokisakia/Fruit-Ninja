@@ -1,36 +1,188 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>水果忍者 网页版</title>
+    <meta charset="utf-8">
+    <title>三角洲行动</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
-    <div id="startScreen" class="overlay active">
-        <h1>水果忍者</h1>
-        <button id="startButton">开始游戏</button>
-        <button id="instructionsButton">游戏说明</button>
+<body>
+  <audio id="boss-bgm" src="background.mp3" loop></audio>
+
+<div id="game-container">
+    <header>
+        <h1>三角洲行动</h1>
+    </header>
+
+    <div id="screen-home" class="screen active" style="text-align:center;">
+        <div style="height: 100px;"></div> <button class="btn" style="background:#2e7d32; max-width:300px; margin:0 auto;" onclick="showLoginBox()">开始游戏</button>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
-
-    <div id="instructionsModal" class="overlay">
-        <div class="modal-content">
-            <h2>游戏说明</h2>
-            <p>在屏幕上滑动鼠标（或手指）来切割飞出的水果。</p>
-            <p>每切到一个水果得 10 分。</p>
-            <p><strong>注意：</strong>不要切到红色的炸弹，否则游戏结束！</p>
-            <button id="closeInstructionsButton">返回</button>
+    <div id="screen-login" class="screen">
+        <div class="login-box">
+            <h3 style="color:var(--accent-color);">用户登录</h3>
+            <input type="text" id="username" class="login-input" placeholder="请输入账户名称">
+            <input type="password" id="password" class="login-input" placeholder="请输入密码">
+            <button class="btn" style="background:#f57c00;" onclick="handleLogin()">登录 / 注册</button>
         </div>
     </div>
 
-    <div id="gameOverScreen" class="overlay">
-        <h2>游戏结束</h2>
-        <p id="finalScore">你的得分: 0</p>
-        <button id="restartButton">重新开始</button>
+    <div id="screen-main-menu" class="screen" style="text-align:center;">
+        <div class="info-panel" style="max-width:400px; margin: 20px auto;">
+            <h3 style="color:#4caf50;">登录成功，欢迎回来！</h3>
+            <p>尊敬的干员：<strong id="logged-user" style="color:var(--accent-color);"></strong></p>
+        </div>
+        
+        <button class="btn" style="background:#c62828; max-width:300px; margin:10px auto;" onclick="showScreen('screen-map-select')">开始狩猎！</button>
+        
+        <button class="btn" style="background:#0277bd; max-width:300px; margin:10px auto;" onclick="openStorage()">我的仓库</button>
+        
+        <button class="btn" style="background:#555; max-width:300px; margin:10px auto;" onclick="logout()">切换账号</button>
     </div>
+
+    <div id="screen-storage" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="color:var(--accent-color); margin:10px 0;">我的仓库</h3>
+            <span style="font-weight:bold; color:#ffb74d;">总资产: $<span id="total-storage-val">0</span></span>
+        </div>
+        
+        <div class="storage-tabs" id="storage-tabs-box">
+            <button class="tab-btn active" onclick="switchStorageTab('电子物品')">电子物品</button>
+            <button class="tab-btn" onclick="switchStorageTab('医疗道具')">医疗道具</button>
+            <button class="tab-btn" onclick="switchStorageTab('工具材料')">工具材料</button>
+            <button class="tab-btn" onclick="switchStorageTab('家居物品')">家居物品</button>
+            <button class="tab-btn" onclick="switchStorageTab('工艺藏品')">工艺藏品</button>
+            <button class="tab-btn" onclick="switchStorageTab('资料情报')">资料情报</button>
+            <button class="tab-btn" onclick="switchStorageTab('能源燃料')">能源燃料</button>
+        </div>
+
+        <div class="storage-grid" id="storage-items-container"></div>
+
+        <button class="btn" style="background:#555; max-width:150px; margin:15px auto 0 auto;" onclick="showScreen('screen-main-menu')">返回</button>
+    </div>
+
+    <div id="screen-map-select" class="screen">
+        <h3 style="text-align:center; color:var(--accent-color);">选择你的部署地图</h3>
+        
+        <div class="map-card" onclick="selectMap('零号大坝')">
+            <h2 style="color:#ffb74d;">📍 零号大坝</h2>
+            <p>危机四伏的水坝据点，适合中近距离交火，资源丰富。</p>
+        </div>
+
+        <div class="map-card disabled">
+            <h2>🔒 航天基地</h2>
+            <p style="color:#ff5252;">(当前版本未开放，敬请期待...)</p>
+        </div>
+
+        <button class="btn" style="background:#555; max-width:150px;" onclick="showScreen('screen-main-menu')">返回</button>
+    </div>
+
+    <div id="screen-hero" class="screen">
+        <h3 style="text-align:center; color:var(--accent-color); margin-bottom: 20px;">选择你的干员</h3>
+        
+        <div class="hero-select-container">
+            
+            <div class="hero-card" onclick="selectHero('红狼')">
+                <img src="hero_redwolf.png" alt="红狼" class="hero-avatar">
+                <div class="hero-info">
+                    <h2 class="hero-name" style="color:#c62828;">红狼</h2>
+                    <p class="hero-desc">红色野兽，擅长快速突击与战术逃跑，战场上的闪电。</p>
+                </div>
+                <div class="select-overlay">点击选择</div>
+            </div>
+    
+            <div class="hero-card" onclick="selectHero('蜂医')">
+                <img src="hero_beemedic.png" alt="蜂医" class="hero-avatar">
+                <div class="hero-info">
+                    <h2 class="hero-name" style="color:#2e7d32;">蜂医</h2>
+                    <p class="hero-desc">战地天使，自带激素恢复与烟雾掩护，团队的续航保障。</p>
+                </div>
+                <div class="select-overlay">点击选择</div>
+            </div>
+    
+            <div class="hero-card" onclick="selectHero('露娜')">
+                <img src="hero_luna.png" alt="露娜" class="hero-avatar">
+                <div class="hero-info">
+                    <h2 class="hero-name" style="color:#1565c0;">露娜</h2>
+                    <p class="hero-desc">月光猎手，自带战场透视与高压电击箭，掌控敌方动向。</p>
+                </div>
+                <div class="select-overlay">点击选择</div>
+            </div>
+    
+        </div>
+    </div>
+
+    <div id="screen-kit" class="screen">
+        <h3>选择你的出击套装</h3>
+        <button class="btn" style="background:#424242;" onclick="selectKit('平衡套')">⚖️ 平衡套 (Car15 / 15格包 / 均衡药切)</button>
+        <button class="btn" style="background:#37474f;" onclick="selectKit('生存套')">🛡️ 生存套 (Uzi / 15格包 / 防护拉满)</button>
+        <button class="btn" style="background:#b71c1c;" onclick="selectKit('火力套')">🔥 火力套 (R93狙击 / 10格小包 / 极高伤害)</button>
+    </div>
+
+    <div id="screen-game" class="screen">
+    
+        <div class="game-layout-grid">
+            
+            <div class="layout-left">
+                <img src="" id="current-hero-img" alt="当前干员" style="display: none;">
+            </div>
+    
+            <div class="layout-middle">
+                
+                <div class="info-panel">
+                    <span class="status-badge" style="background:#fbc02d; color:#000;">
+                        ⏳ 剩余行动: <span id="ui-steps">30</span>
+                    </span>
+                    <div>干员: <span id="ui-hero" class="badge"></span> | 套装: <span id="ui-kit" class="badge"></span></div>
+                    <div style="margin-top:5px;">🩸 健康: <span id="ui-hp">100</span> | 🛡️ 身体甲: <span id="ui-armor">0</span> | 🪖 头部甲: <span id="ui-helmet">0</span></div>
+                    <div style="margin-top:5px;">📍 当前位置: <strong id="ui-location" style="color:var(--accent-color);">未定位</strong> <span id="ui-floor" style="color:#ba68c8;"></span></div>
+                </div>
+    
+                <div class="grid">
+                    <div>
+                        <h4>🗺️ 行动与移动</h4>
+                        <div id="combat-status" class="combat-alert" style="display:none;"></div>
+                        
+                        <div id="floor-buttons" style="display:flex; gap:5px; margin-bottom:10px;"></div>
+                        
+                        <div id="action-buttons"></div>
+                        
+                        <div id="combat-buttons" style="display:none;">
+                            <button class="btn" id="btn-shoot" style="background:var(--btn-combat);" onclick="combatShoot()">💥 射击 (正面交火)</button>
+                            <button class="btn" style="background:#555;" onclick="combatRetreat()">🏃 尝试撤退</button>
+                        </div>
+                        
+                        <button class="btn" style="background:#d32f2f; display:none;" id="btn-extract" onclick="extract()">🏃 安全撤离</button>
+                    </div>
+                    <div>
+                        <h4>🎒 背包物资 (<span id="ui-inv-count">0</span>/<span id="ui-inv-max">15</span>)</h4>
+                        <div id="ui-inventory"></div>
+                        <div style="margin-top:10px; font-weight:bold; text-align:right;">预估总价值: <span style="color:#ffb74d;">$</span><span id="ui-value" style="color:#ffb74d;">0</span></div>
+                        
+                        <div id="pending-items-area" style="margin-top:15px; display:none;">
+                            <h4 style="color:var(--accent-color);">🔍 刚摸出来的物品 (请选择拾取)</h4>
+                            <div id="ui-pending-items"></div>
+                        </div>
+                    </div>
+                </div>
+    
+            </div> <div class="layout-right">
+                <h4 style="margin-top: 0;">📜 战术日志</h4>
+                <div class="log-box" id="game-log"></div>
+            </div>
+    
+        </div> </div>
+
+    <div id="screen-result" class="screen" style="text-align:center;">
+        <h2 id="result-title" style="color:var(--accent-color);">顺利撤离！</h2>
+        <div class="info-panel">
+            <p>你在【零号大坝】成功带出了以下物资：</p>
+            <div id="result-items" style="text-align:left; margin: 10px 20px;"></div>
+            <h3>💰 累计总价值: $<span id="result-value">0</span></h3>
+        </div>
+        <button class="btn" style="background:#2e7d32;" onclick="location.reload()">再来一局</button>
+    </div>
+</div>
 
     <script src="game.js"></script>
 </body>

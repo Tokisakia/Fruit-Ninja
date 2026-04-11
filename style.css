@@ -1,108 +1,393 @@
 @charset "utf-8";
 /* CSS Document */
 
-/* 基本设置，实现全屏 */
-body, html {
+:root {
+    --bg-color: #121212;
+    --card-bg: rgba(30, 30, 30, 0.85); 
+    --text-color: #e0e0e0;
+    --accent-color: #ff9800;
+    --btn-move: #0277bd;
+    --btn-loot: #f57c00;
+    --btn-floor: #6a1b9a;
+    --btn-combat: #c62828; 
+    --btn-boss: #b71c1c; 
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     margin: 0;
-    padding: 0;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    transition: background-image 0.5s ease-in-out;
+}
+#game-container {
     width: 100%;
-    height: 100%;
-    overflow: hidden; /* 防止出现滚动条 */
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    max-width: 1400px;
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+}
+/* 2. 新增三列网格布局系统 */
+.game-layout-grid {
+    display: grid;
+    /* 定义三列宽度：左边固定360px，中间自适应(1fr)，右侧固定320px */
+    grid-template-columns: 360px 1fr 320px;
+    gap: 25px; /* 列与列之间的间距 */
+    align-items: start; /* 顶部对齐 */
+}
+
+/* 3. 左侧干员图片样式 */
+.layout-left img {
+    width: 360px;
+    height: 640px;
+    object-fit: cover; /* 保证图片不变形 */
+    border-radius: 10px;
+    border: 2px solid #555; /* 加个边框增加质感，可按需修改 */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+
+/* 4. 中间列布局微调 */
+.layout-middle {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* 让面板之间有呼吸感 */
+}
+
+/* 5. 右侧战术日志固定高度与滚动 */
+.layout-right {
+    display: flex;
+    flex-direction: column;
+    height: 640px; /* 和左侧图片保持等高 */
+}
+.layout-right .log-box {
+    flex-grow: 1; /* 自动填满剩余高度 */
+    overflow-y: auto; /* 内容超出时自动显示垂直滚动条 */
+    margin: 0; 
+}
+
+/* 6. 响应式适配 (当在较小屏幕或手机上玩时，自动变回竖排) */
+@media (max-width: 1200px) {
+    .game-layout-grid {
+        grid-template-columns: 1fr; /* 屏幕不够宽时，变成单列瀑布流 */
+    }
+    .layout-left img {
+        width: 100%;
+        max-width: 360px;
+        height: auto;
+        margin: 0 auto;
+        display: block;
+    }
+    .layout-right {
+        height: 400px; /* 手机端日志区稍微矮一点 */
+    }
+}
+
+header {
+    text-align: center;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+h1 { color: var(--accent-color); margin: 0; font-size: 24px; }
+.screen { display: none; }
+.active { display: block; }
+.btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
     color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+    box-sizing: border-box;
+    transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.85; }
+.info-panel {
+    background: rgba(42, 42, 42, 0.8);
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.log-box {
+    height: 160px;
+    overflow-y: auto;
+    background: rgba(17, 17, 17, 0.9);
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 13px;
+    color: #4caf50;
+    margin-top: 10px;
+}
+.grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 15px;
+}
+.item-slot {
+    padding: 5px 8px;
+    background: #333;
+    border-radius: 3px;
+    font-size: 12px;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.badge {
+    background: var(--accent-color);
+    color: black;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 12px;
+}
+h4 { margin: 10px 0 5px 0; color: #bbb;}
+
+.combat-alert {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+.discard-btn {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 6px;
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.discard-btn:hover {
+    background: #f44336;
+}
+.temp-item-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 152, 0, 0.2);
+    border: 1px solid var(--accent-color);
+    padding: 8px;
+    border-radius: 5px;
+    margin-bottom: 5px;
 }
 
-/* 游戏画布，默认隐藏 */
-canvas {
-    display: none;
-    background: #222; /* 游戏时的深色背景 */
+/* 登录和地图界面专属样式 */
+.login-box {
+    max-width: 350px;
+    margin: 20px auto;
+    text-align: center;
+}
+.login-input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #555;
+    background: #222;
+    color: #fff;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+.map-card {
+    border: 2px solid #555;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(40, 40, 40, 0.6);
+}
+.map-card:hover:not(.disabled) {
+    border-color: var(--accent-color);
+    background: rgba(60, 60, 60, 0.8);
+}
+.map-card.disabled {
+    border-color: #333;
+    color: #777;
+    cursor: not-allowed;
+    background: rgba(20, 20, 20, 0.8);
+}
+.map-card h2 { margin: 0 0 10px 0; }
+
+/* ==========================================
+   🌟 干员选择界面专属样式 (竖版卡片并列)
+   ========================================== */
+
+/* 干员卡片容器：使用 Flexbox 实现横向并列 */
+.hero-select-container {
+    display: flex;
+    justify-content: center; /* 居中对齐 */
+    gap: 20px; /* 卡片之间的间距 */
+    flex-wrap: wrap; /* 屏幕太窄时自动换行 */
+    padding: 10px 0;
 }
 
-/* 所有覆盖层 (菜单、游戏结束等) */
-.overlay {
+/* 干员卡片基础样式 */
+.hero-card {
+    width: 260px; /* 卡片固定宽度 */
+    background: rgba(30, 30, 30, 0.9); /* 比背景略深的颜色 */
+    border: 2px solid #444; /* 默认边框 */
+    border-radius: 8px;
+    overflow: hidden; /* 隐藏溢出内容，保证圆角 */
+    cursor: pointer;
+    transition: all 0.3s ease; /* 增加平滑过渡动画 */
+    position: relative; /* 为遮罩层定位 */
+    display: flex;
+    flex-direction: column; /* 内容纵向排列 */
+}
+
+/* 鼠标悬停时的卡片效果 */
+.hero-card:hover {
+    border-color: var(--accent-color); /* 边框变亮 */
+    transform: translateY(-5px); /* 卡片微微上移 */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.6); /* 增加阴影 */
+}
+
+/* 干员全身/半身竖图 */
+.hero-avatar {
+    width: 100%;
+    height: 320px; /* 固定高度，确保三个图片整齐 */
+    object-fit: cover; /* 图片等比例裁剪填充，防止拉伸 */
+    object-position: top;
+    border-bottom: 2px solid #444; /* 图片下方分割线 */
+}
+
+/* 干员文字信息区域 */
+.hero-info {
+    padding: 15px;
+    flex-grow: 1; /* 填充剩余空间，使底部对齐 */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+/* 干员名字 */
+.hero-name {
+    margin: 0 0 10px 0;
+    font-size: 22px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* 干员简介 */
+.hero-desc {
+    margin: 0;
+    font-size: 14px;
+    color: #bbb;
+    line-height: 1.5;
+    text-align: justify; /* 文字两端对齐 */
+}
+
+/* 点击选择的悬停遮罩层 */
+.select-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    display: none; /* 默认隐藏 */
-    flex-direction: column;
+    background: rgba(255, 152, 0, 0.2); /* 淡淡的橙色遮罩 */
+    color: white;
+    display: flex;
     justify-content: center;
     align-items: center;
-    text-align: center;
-    background-color: rgba(0, 0, 0, 0.6); /* 半透明黑色背景 */
+    font-size: 20px;
+    font-weight: bold;
+    opacity: 0; /* 默认透明 */
+    transition: opacity 0.3s ease;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
 }
 
-/* .active 类用于显示当前活动的覆盖层 */
-.overlay.active {
+/* 鼠标悬停时显示遮罩 */
+.hero-card:hover .select-overlay {
+    opacity: 1;
+}
+
+/* 针对手机端等窄屏的优化 */
+@media (max-width: 800px) {
+    .hero-card {
+        width: 100%; /* 手机上占满宽度 */
+        max-width: 300px; /* 但不要太大 */
+    }
+    .hero-avatar {
+        height: 280px; /* 手机上稍微降低图片高度 */
+    }
+}
+
+/* 🌟 仓库界面专属样式 */
+.storage-tabs {
     display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    margin-bottom: 15px;
 }
-
-/* 开始菜单特定样式 */
-#startScreen {
-    /* 请确保你的文件夹中有一张名为 'background.jpg' 的图片!
-      否则请删除或修改下面这行。
-    */
-    background-image: url('background.png');
-    background-size: cover;
-    background-position: center;
-}
-
-#startScreen h1 {
-    font-size: 5rem; /* 大标题 */
+.tab-btn {
+    background: #424242;
     color: #fff;
-    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7);
-}
-
-/* 按钮统一样式 */
-button {
-    font-size: 1.5rem;
-    padding: 1rem 2rem;
-    margin: 0.5rem;
     border: none;
-    border-radius: 10px;
-    background-color: #4CAF50; /* 绿色 */
-    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    font-size: 13px;
+    transition: background 0.2s;
 }
-
-button:hover {
-    background-color: #45a049;
+.tab-btn:hover { background: #616161; }
+.tab-btn.active {
+    background: var(--accent-color);
+    color: #000;
+    font-weight: bold;
 }
-
-/* 游戏说明弹窗 */
-#instructionsModal .modal-content {
-    background: white;
-    color: #333;
-    padding: 2rem;
-    border-radius: 15px;
-    max-width: 500px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+.storage-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    max-height: 350px;
+    overflow-y: auto;
+    background: rgba(17, 17, 17, 0.8);
+    padding: 15px;
+    border-radius: 5px;
+    min-height: 100px;
 }
-
-#instructionsModal p {
-    font-size: 1.1rem;
-    line-height: 1.6;
+.storage-item {
+    background: #333;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 13px;
+    border: 1px solid #444;
+    position: relative;
 }
-
-/* 游戏结束界面 */
-#gameOverScreen h2 {
-    font-size: 3rem;
-    color: #dc3545; /* 红色 */
+.storage-item .count {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    background: var(--accent-color);
+    color: #000;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 1px 5px;
+    border-radius: 10px;
 }
-
-#finalScore {
-    font-size: 2rem;
-    margin: 1rem 0;
+.storage-item .item-val {
+    color: #ffb74d;
+    font-size: 11px;
+    margin-top: 5px;
+    display: block;
 }
-
-#restartButton {
-    background-color: #007bff; /* 蓝色 */
-}
-
-#restartButton:hover {
-    background-color: #0069d9;
-}
-
